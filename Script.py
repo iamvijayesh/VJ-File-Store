@@ -4,16 +4,18 @@
 
 
 class script(object):
-    START_TXT = """<b>Hello {},my name is{}, I am here to help you out with MBA STUDY MATERIALS</b>"""
+    START_TXT = """<b>Hᴇʟʟᴏ {},ᴍʏ ɴᴀᴍᴇ {}</b>"""
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
     
-    CAPTION = """<b>{file_name}
+    CAPTION = """<b>📂 ғɪʟᴇɴᴀᴍᴇ : {file_name}
 
-Jᴏɪɴ [BACKUP ᴄʜᴀɴɴᴇʟ](https://t.me/backcatmaterial)</b>""" 
+sɪᴢᴇ ⚙️: {file_size}
+
+Jᴏɪɴ [ᴜᴘᴅᴀᴛᴇ ᴄʜᴀɴɴᴇʟ](https://t.me/vj_botz)</b>""" 
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ

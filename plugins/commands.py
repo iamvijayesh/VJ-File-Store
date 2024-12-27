@@ -206,7 +206,7 @@ async def start(client, message):
                     await x.delete()
                 except:
                     pass
-            await k.edit_text("<b>Click on the link again to get it back</b>")
+            await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
         return
 
 # Don't Remove Credit Tg - @VJ_Botz
@@ -261,13 +261,13 @@ async def start(client, message):
                 )
             if AUTO_DELETE_MODE == True:
                 k = await client.send_message(chat_id = message.from_user.id, text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Video will be deleted in <b><u>{AUTO_DELETE} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>Don't worry you can get it back by clicking on the link again.</b>")
-                await asyncio.sleep(AUTO_DELETE_TIME)
+                 await asyncio.sleep(AUTO_DELETE_TIME)
                 try:
                     await msg.delete()
                 except:
                     pass
                 await g.delete()
-                await k.edit_text("<b>Click on the link again to get it back</b>")
+                await k.edit_text("<b>Your File/Video is successfully deleted!!!</b>")
             return
         except:
             pass
@@ -327,7 +327,7 @@ async def start(client, message):
             await x.delete()
         except:
             pass
-        await k.edit_text("<b>Click on the link again to get it back</b>")       
+        await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")      
         
 
 # Don't Remove Credit Tg - @VJ_Botz

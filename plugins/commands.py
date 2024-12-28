@@ -1,6 +1,9 @@
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
+from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import Update
+
 
 import os
 import logging
@@ -72,6 +75,63 @@ async def start(client, message):
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
+OWNER_ID = int(os.environ.get("OWNER_ID", "7613080889"))  # Replace with your Telegram user ID
+
+def is_owner(update: Update):
+    """Check if the user is the owner."""
+    return update.effective_user.id == OWNER_ID
+
+def start(update: Update, context: CallbackContext):
+    """Handle the /start command silently. Open to everyone."""
+    pass  # No response for the /start command
+
+def restricted_command(update: Update, context: CallbackContext, command_name: str):
+    """General handler for restricted commands."""
+    if not is_owner(update):
+        update.message.reply_text(f"Sorry, the {command_name} command is restricted to the bot owner.")
+        return
+    update.message.reply_text(f"The {command_name} command was executed successfully!")
+
+def link(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/link")
+
+def batch(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/batch")
+
+def base_site(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/base_site")
+
+def api(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/api")
+
+def delete_cloned(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/deletecloned")
+
+def broadcast(update: Update, context: CallbackContext):
+    restricted_command(update, context, "/broadcast")
+
+def main():
+    """Start the bot."""
+    BOT_TOKEN = os.environ.get("BOT_TOKEN", "your-bot-token-here")
+    updater = Updater(BOT_TOKEN)
+    dispatcher = updater.dispatcher
+
+    # Command handlers
+    dispatcher.add_handler(CommandHandler("start", start))  # Silent for everyone
+    dispatcher.add_handler(CommandHandler("link", link))  # Restricted to owner
+    dispatcher.add_handler(CommandHandler("batch", batch))  # Restricted to owner
+    dispatcher.add_handler(CommandHandler("base_site", base_site))  # Restricted to owner
+    dispatcher.add_handler(CommandHandler("api", api))  # Restricted to owner
+    dispatcher.add_handler(CommandHandler("deletecloned", delete_cloned))  # Restricted to owner
+    dispatcher.add_handler(CommandHandler("broadcast", broadcast))  # Restricted to owner
+
+    # Start polling
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == "__main__":
+    main()
+    
 # Ask Doubt on telegram @KingVJ01
     
     data = message.command[1]

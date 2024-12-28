@@ -32,46 +32,26 @@ async def allowed(_, __, message):
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-api_id = "29292134"
-api_hash = "de07f7315d14befd6d8d434b29dfcea7"
-
-# Create a client
-client = Client("my_bot", api_id=api_id, api_hash=api_hash)
-
-# Define the allowed types for custom filtering
-allowed_types = ["document", "video", "audio", "text"]  # Include text messages
-
-# Create a custom filter for allowed message types
-def allowed_types_filter(message):
-    return message.chat.type == "private" and message.content_type in allowed_types
-
-@client.on_message(allowed_types_filter)  # Use the combined filter directly
-async def handle_allowed_messages(client, message):
-    """
-    This function handles messages of allowed types (documents, videos, audio, and text)
-    in private chats and generates a single shareable link for the entire sequence.
-    """
-
-    username = (await client.get_me()).username
-
-    # Generate a unique identifier for the message sequence
-    sequence_id = f"{message.from_user.id}_{message.date.timestamp()}"
-
-    # Construct the shareable link
-    if WEBSITE_URL_MODE == True:
-        share_link = f"{WEBSITE_URL}?Tech_VJ={sequence_id}"
-    else:
-        share_link = f"https://t.me/{username}?start={sequence_id}"
-
-
+@Client.on_message((filters.document | filters.video | filters.audio) & filters.private & filters.create(allowed))
+async def incoming_gen_link(bot, message):
+    username = (await bot.get_me()).username
+    file_type = message.media
+    file_id, ref = unpack_new_file_id((getattr(message, file_type.value)).file_id)
+    string = 'file_'
+    string += file_id
+    outstr = base64.urlsafe_b64encode(string.encode("ascii")).decode().strip("=")
     user_id = message.from_user.id
     user = await get_user(user_id)
+    if WEBSITE_URL_MODE == True:
+        share_link = f"{WEBSITE_URL}?Tech_VJ={outstr}"
+    else:
+        share_link = f"https://t.me/{username}?start={outstr}"
     if user["base_site"] and user["shortener_api"] != None:
         short_link = await get_short_link(user, share_link)
         await message.reply(f"<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:\n\n🖇️ sʜᴏʀᴛ ʟɪɴᴋ :- {short_link}</b>")
     else:
         await message.reply(f"<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:\n\n🔗 ᴏʀɪɢɪɴᴀʟ ʟɪɴᴋ :- {share_link}</b>")
-
+        
 
 @Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
 async def gen_link_s(bot, message):

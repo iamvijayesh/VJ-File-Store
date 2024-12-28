@@ -4,7 +4,6 @@
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from telegram import Update
 
-
 import os
 import logging
 import random
@@ -134,141 +133,175 @@ if __name__ == "__main__":
     
 # Ask Doubt on telegram @KingVJ01
     
+  
+
+async def handle_message(client, message):
     data = message.command[1]
+
     try:
         pre, file_id = data.split('_', 1)
-    except:
+    except ValueError:
         file_id = data
         pre = ""
+
     if data.split("-", 1)[0] == "verify":
         userid = data.split("-", 2)[1]
         token = data.split("-", 3)[2]
+
         if str(message.from_user.id) != str(userid):
             return await message.reply_text(
-                text="<b>Invalid link or Expired link !</b>",
+                text="<b>Invalid link or Expired link!</b>",
                 protect_content=True
             )
+
         is_valid = await check_token(client, userid, token)
-        if is_valid == True:
+        if is_valid:
             await message.reply_text(
-                text=f"<b>Hey {message.from_user.mention}, You are successfully verified !\nNow you have unlimited access for all files till today midnight.</b>",
+                text=f"<b>Hey {message.from_user.mention}, You are successfully verified! \nNow you have unlimited access for all files till today midnight.</b>",
                 protect_content=True
             )
             await verify_user(client, userid, token)
         else:
             return await message.reply_text(
-                text="<b>Invalid link or Expired link !</b>",
+                text="<b>Invalid link or Expired link!</b>",
                 protect_content=True
             )
+
     elif data.split("-", 1)[0] == "BATCH":
         try:
-            if not await check_verification(client, message.from_user.id) and VERIFY_MODE == True:
+            if not await check_verification(client, message.from_user.id) and VERIFY_MODE:
                 btn = [[
                     InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start="))
-                ],[
+                ], [
                     InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
                 ]]
+
                 await message.reply_text(
-                    text="<b>You are not verified !\nKindly verify to continue !</b>",
+                    text="<b>You are not verified! \nKindly verify to continue!</b>",
                     protect_content=True,
                     reply_markup=InlineKeyboardMarkup(btn)
                 )
                 return
         except Exception as e:
             return await message.reply_text(f"**Error - {e}**")
-        sts = await message.reply("**🔺 ᴘʟᴇᴀsᴇ ᴡᴀɪᴛ**")
+
+        sts = await message.reply("**🔺 Please wait...**")
         file_id = data.split("-", 1)[1]
         msgs = BATCH_FILES.get(file_id)
+
         if not msgs:
             file = await client.download_media(file_id)
-            try: 
+            try:
                 with open(file) as file_data:
-                    msgs=json.loads(file_data.read())
-            except:
+                    msgs = json.loads(file_data.read())
+            except Exception:
                 await sts.edit("FAILED")
-                return await client.send_message(LOG_CHANNEL, "UNABLE TO OPEN FILE.")
+                return await client.send_message(LOG_CHANNEL, "Unable to open file.")
+
             os.remove(file)
             BATCH_FILES[file_id] = msgs
-            
+
         filesarr = []
         for msg in msgs:
             title = msg.get("title")
-            size=get_size(int(msg.get("size", 0)))
-            f_caption=msg.get("caption", "")
+            size = get_size(int(msg.get("size", 0)))
+            f_caption = msg.get("caption", "")
+
             if BATCH_FILE_CAPTION:
                 try:
-                    f_caption=BATCH_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
+                    f_caption = BATCH_FILE_CAPTION.format(
+                        file_name=title or '',
+                        file_size=size or '',
+                        file_caption=f_caption or ''
+                    )
                 except Exception as e:
                     logger.exception(e)
-                    f_caption=f_caption
-            if f_caption is None:
+                    f_caption = f_caption
+
+            if not f_caption:
                 f_caption = f"{title}"
+
             try:
-                if STREAM_MODE == True:
-                    # Create the inline keyboard button with callback_data
+                if STREAM_MODE:
                     user_id = message.from_user.id
-                    username =  message.from_user.mention 
+                    username = message.from_user.mention
 
                     log_msg = await client.send_cached_media(
                         chat_id=LOG_CHANNEL,
-                        file_id=msg.get("file_id"),
+                        file_id=msg.get("file_id")
                     )
-                    fileName = {quote_plus(get_name(log_msg))}
-                    stream = f"{URL}watch/{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
-                    download = f"{URL}{str(log_msg.id)}/{quote_plus(get_name(log_msg))}?hash={get_hash(log_msg)}"
- 
+
+                    fileName = quote_plus(get_name(log_msg))
+                    stream = f"{URL}watch/{str(log_msg.id)}/{fileName}?hash={get_hash(log_msg)}"
+                    download = f"{URL}{str(log_msg.id)}/{fileName}?hash={get_hash(log_msg)}"
+
                     await log_msg.reply_text(
-                        text=f"•• ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜰᴏʀ ɪᴅ #{user_id} \n•• ᴜꜱᴇʀɴᴀᴍᴇ : {username} \n\n•• ᖴᎥᒪᗴ Nᗩᗰᗴ : {fileName}",
+                        text=(
+                            f"•• Link generated for ID #{user_id}\n"
+                            f"•• Username: {username}\n\n"
+                            f"•• File Name: {fileName}"
+                        ),
                         quote=True,
                         disable_web_page_preview=True,
-                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # we download Link
-                                                            InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)]])  # web stream Link
+                        reply_markup=InlineKeyboardMarkup([
+                            [
+                                InlineKeyboardButton("🚀 Fast Download 🚀", url=download),
+                                InlineKeyboardButton("🖥️ Watch Online 🖥️", url=stream)
+                            ]
+                        ])
                     )
-                if STREAM_MODE == True:
+
+                button = None
+                if STREAM_MODE:
                     button = [[
-                        InlineKeyboardButton("🚀 Fast Download 🚀", url=download),  # we download Link
-                        InlineKeyboardButton('🖥️ Watch online 🖥️', url=stream)
-                    ],[
-                        InlineKeyboardButton("• ᴡᴀᴛᴄʜ ɪɴ ᴡᴇʙ ᴀᴘᴘ •", web_app=WebAppInfo(url=stream))
+                        InlineKeyboardButton("🚀 Fast Download 🚀", url=download),
+                        InlineKeyboardButton("🖥️ Watch Online 🖥️", url=stream)
+                    ], [
+                        InlineKeyboardButton("• Watch in Web App •", web_app=WebAppInfo(url=stream))
                     ]]
-                    reply_markup=InlineKeyboardMarkup(button)
-                else:
-                    reply_markup = None
+
                 msg = await client.send_cached_media(
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
                     protect_content=msg.get('protect', False),
-                    reply_markup=reply_markup
+                    reply_markup=InlineKeyboardMarkup(button) if button else None
                 )
                 filesarr.append(msg)
-                
+
             except FloodWait as e:
                 await asyncio.sleep(e.x)
-                logger.warning(f"Floodwait of {e.x} sec.")
-                msg = await client.send_cached_media(
-                    chat_id=message.from_user.id,
-                    file_id=msg.get("file_id"),
-                    caption=f_caption,
-                    protect_content=msg.get('protect', False),
-                    reply_markup=InlineKeyboardMarkup(button)
-                )
-                filesarr.append(msg)
+                logger.warning(f"Floodwait of {e.x} seconds.")
             except Exception as e:
                 logger.warning(e, exc_info=True)
                 continue
-            await asyncio.sleep(1) 
+
+            await asyncio.sleep(1)
+
         await sts.delete()
-        if AUTO_DELETE_MODE == True:
-            k = await client.send_message(chat_id = message.from_user.id, text=f"<b><u>❗️❗️❗️IMPORTANT❗️️❗️❗️</u></b>\n\nThis Video will be deleted in <b><u>{AUTO_DELETE} minutes</u> 🫥 <i></b>(Due to Copyright Issues)</i>.\n\n<b><i>You can get it back by just clicking on the link again!!</b>")
+
+        if AUTO_DELETE_MODE:
+            k = await client.send_message(
+                chat_id=message.from_user.id,
+                text=(
+                    f"<b><u>❗️❗️❗️IMPORTANT❗️❗️❗️</u></b>\n\n"
+                    f"This video will be deleted in <b><u>{AUTO_DELETE} minutes</u></b> 🫥 <i>(Due to copyright issues)</i>.\n\n"
+                    f"<b><i>You can get it back by just clicking on the link again!</i></b>"
+                )
+            )
+
             await asyncio.sleep(AUTO_DELETE_TIME)
+
             for x in filesarr:
                 try:
                     await x.delete()
-                except:
+                except Exception:
                     pass
-            await k.edit_text("<b>Your All Files/Videos is successfully deleted!!!</b>")
+
+            await k.edit_text("<b>All your files/videos have been successfully deleted!</b>")
+
         return
+
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ

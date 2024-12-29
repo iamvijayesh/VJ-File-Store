@@ -29,16 +29,16 @@ BATCH_FILES = {}
 
 
 async def is_subscribed(bot, query, channel):
-    btn = []
+    buttons = []
     for id in channel:
         chat = await bot.get_chat(int(id))
         try:
             await bot.get_chat_member(id, query.from_user.id)
         except UserNotParticipant:
-            btn.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
+            buttons.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
         except Exception as e:
             pass
-    return btn
+    return buttons
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
@@ -64,14 +64,14 @@ def get_size(size):
 async def start(client, message):
     if AUTH_CHANNEL:
         try:
-            btn = await is_subscribed(client, message, AUTH_CHANNEL)
-            if btn:
+            buttons = await is_subscribed(client, message, AUTH_CHANNEL)
+            if buttons:
                 username = (await client.get_me()).username
                 if message.command[1]:
-                    btn.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}")])
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}")])
                 else:
-                    btn.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true")])
-                await message.reply_text(text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>", reply_markup=InlineKeyboardMarkup(btn))
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true")])
+                await message.reply_text(text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>", reply_markup=InlineKeyboardMarkup(buttons))
                 return
         except Exception as e:
             print(e)
@@ -130,7 +130,7 @@ async def start(client, message):
     elif data.split("-", 1)[0] == "BATCH":
         try:
             if not await check_verification(client, message.from_user.id) and VERIFY_MODE == True:
-                btn = [[
+                buttons = [[
                     InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start="))
                 ],[
                     InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
@@ -138,7 +138,7 @@ async def start(client, message):
                 await message.reply_text(
                     text="<b>You are not verified !\nKindly verify to continue !</b>",
                     protect_content=True,
-                    reply_markup=InlineKeyboardMarkup(btn)
+                    reply_markup=InlineKeyboardMarkup(buttons)
                 )
                 return
         except Exception as e:
@@ -245,7 +245,7 @@ async def start(client, message):
     if not files_:
         pre, file_id = ((base64.urlsafe_b64decode(data + "=" * (-len(data) % 4))).decode("ascii")).split("_", 1)
         if not await check_verification(client, message.from_user.id) and VERIFY_MODE == True:
-            btn = [[
+            buttons = [[
                 InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start="))
             ],[
                 InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
@@ -253,7 +253,7 @@ async def start(client, message):
             await message.reply_text(
                 text="<b>You are not verified !\nKindly verify to continue !</b>",
                 protect_content=True,
-                reply_markup=InlineKeyboardMarkup(btn)
+                reply_markup=InlineKeyboardMarkup(buttons)
             )
             return
         try:
@@ -318,7 +318,7 @@ async def start(client, message):
     if f_caption is None:
         f_caption = f"{files.file_name}"
     if not await check_verification(client, message.from_user.id) and VERIFY_MODE == True:
-        btn = [[
+        buttons = [[
             InlineKeyboardButton("Verify", url=await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start="))
         ],[
             InlineKeyboardButton("How To Open Link & Verify", url=VERIFY_TUTORIAL)
@@ -326,7 +326,7 @@ async def start(client, message):
         await message.reply_text(
             text="<b>You are not verified !\nKindly verify to continue !</b>",
             protect_content=True,
-            reply_markup=InlineKeyboardMarkup(btn)
+            reply_markup=InlineKeyboardMarkup(buttons)
         )
         return
     x = await client.send_cached_media(

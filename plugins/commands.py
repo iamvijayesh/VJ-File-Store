@@ -18,8 +18,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import verify_user, check_token, check_verification, get_token
 from config import *
 import re
-from plugins.database import *
-import urllib.parse
 import json
 import base64
 from config import ADMINS, PROTECT_CONTENT, AUTH_CHANNEL
@@ -62,51 +60,31 @@ def get_size(size):
 # Ask Doubt on telegram @KingVJ0
 
 
-from pyrogram import Client, filters, InlineKeyboardButton, InlineKeyboardMarkup
-from pyrogram.errors import ChatMemberStatusMember
-from config import *
-from plugins.database import *
-import asyncio
-import random
-import urllib.parse
-
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if AUTH_CHANNEL:
-        while True:
-            try:
-                buttons = await is_subscribed(client, message, AUTH_CHANNEL)
-                if buttons:
-                    # User is not subscribed
-                    username = (await client.get_me()).username
-                    buttons = [
-                        [InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={urllib.parse.quote(message.command[1]) if message.command[1] else 'true'}")]
-                    ]
-                    await message.reply_text(
-                        text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel and then click on the Try Again button. 😇</b>",
-                        reply_markup=InlineKeyboardMarkup(buttons)
-                    )
-                    break 
+        try:
+            buttons = await is_subscribed(client, message, AUTH_CHANNEL)
+            if buttons:
+                username = (await client.get_me()).username
+                if message.command[1]:
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}")])
                 else:
-                    # User is subscribed, break the loop and continue
-                    break
-            except ChatMemberStatusMember:
-                # User is already subscribed, break the loop and continue
-                break
-            except Exception as e:
-                print(f"Error checking subscription: {e}")
-                break  # Exit the loop on any other error
-
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true")])
+                await message.reply_text(text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>", reply_markup=InlineKeyboardMarkup(buttons))
+                return
+        except Exception as e:
+            print(e)
     username = (await client.get_me()).username
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
     if len(message.command) != 2:
         buttons = [[
-            [
-                InlineKeyboardButton('💁‍♀️ ʜᴇʟᴘ', callback_data='help'),
-                InlineKeyboardButton('😊 ᴀʙᴏᴜᴛ', callback_data='about')
-            ]
+           
+            ],[
+            InlineKeyboardButton('💁‍♀️ ʜᴇʟᴘ', callback_data='help'),
+            InlineKeyboardButton('😊 ᴀʙᴏᴜᴛ', callback_data='about')
         ]]
         if CLONE_MODE == True:
             buttons.append([InlineKeyboardButton('🤖 ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ ʙᴏᴛ', callback_data='clone')])

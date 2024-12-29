@@ -28,25 +28,17 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 
 
-async def is_subscribed(bot, query, channels):
+async def is_subscribed(bot, query, channel):
     buttons = []
-    for channel_id in channels:
+    for id in channel:
+        chat = await bot.get_chat(int(id))
         try:
-            chat = await bot.get_chat(int(channel_id))
-            try:
-                # Check if the user is a member of the channel
-                await bot.get_chat_member(channel_id, query.from_user.id)
-            except UserNotParticipant:
-                # User is not a participant, add a "Join" button
-                buttons.append([
-                    InlineKeyboardButton(f"Join {chat.title}", url=chat.invite_link)
-                ])
-            except Exception as e:
-                print(f"Error checking membership for {channel_id}: {e}")
+            await bot.get_chat_member(id, query.from_user.id)
+        except UserNotParticipant:
+            buttons.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
         except Exception as e:
-            print(f"Error fetching chat info for {channel_id}: {e}")
+            pass
     return buttons
-
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
@@ -68,60 +60,34 @@ def get_size(size):
 # Ask Doubt on telegram @KingVJ0
 
 
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-import random
-
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if AUTH_CHANNEL:
         try:
             buttons = await is_subscribed(client, message, AUTH_CHANNEL)
-            username = (await client.get_me()).username
             if buttons:
-                # Adding the "Try Again" button
-                if len(message.command) > 1:
-                    buttons.append([
-                        InlineKeyboardButton(
-                            "♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}"
-                        )
-                    ])
+                username = (await client.get_me()).username
+                if message.command[1]:
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}")])
                 else:
-                    buttons.append([
-                        InlineKeyboardButton(
-                            "♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true"
-                        )
-                    ])
-                await message.reply_text(
-                    text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>",
-                    reply_markup=InlineKeyboardMarkup(buttons)
-                )
+                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true")])
+                await message.reply_text(text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>", reply_markup=InlineKeyboardMarkup(buttons))
                 return
         except Exception as e:
-            print(f"Error: {e}")
-
+            print(e)
     username = (await client.get_me()).username
-
-    # Check if the user is in the database, and log if they're new
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
-        await client.send_message(
-            LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention)
-        )
-
-    # Handling the "start" command without parameters
+        await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
     if len(message.command) != 2:
-        buttons = [
-            [InlineKeyboardButton('💁‍♀️ ʜᴇʟᴘ', callback_data='help'),
-             InlineKeyboardButton('😊 ᴀʙᴏᴜᴛ', callback_data='about')]
-        ]
-
-        # Adding "Clone Bot" button if CLONE_MODE is enabled
-        if CLONE_MODE:
-            buttons.append([
-                InlineKeyboardButton('🤖 ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ ʙᴏᴛ', callback_data='clone')
-            ])
-
+        buttons = [[
+           
+            ],[
+            InlineKeyboardButton('💁‍♀️ ʜᴇʟᴘ', callback_data='help'),
+            InlineKeyboardButton('😊 ᴀʙᴏᴜᴛ', callback_data='about')
+        ]]
+        if CLONE_MODE == True:
+            buttons.append([InlineKeyboardButton('🤖 ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ ʙᴏᴛ', callback_data='clone')])
         reply_markup = InlineKeyboardMarkup(buttons)
         me2 = (await client.get_me()).mention
         await message.reply_photo(
@@ -130,7 +96,6 @@ async def start(client, message):
             reply_markup=reply_markup
         )
         return
-
 
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ

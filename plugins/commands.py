@@ -18,7 +18,6 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from utils import verify_user, check_token, check_verification, get_token
 from config import *
 import re
-from pyrogram.errors import ChatMemberStatusMember
 from plugins.database import *
 import urllib.parse
 import json

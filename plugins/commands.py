@@ -178,7 +178,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False),
+                    protect_content=msg.get('protect', True),
                     reply_markup=reply_markup
                 )
                 filesarr.append(msg)
@@ -190,7 +190,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False),
+                    protect_content=msg.get('protect', True),
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)

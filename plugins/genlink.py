@@ -53,7 +53,7 @@ async def incoming_gen_link(bot, message):
         await message.reply(f"<b>⭕ ʜᴇʀᴇ ɪs ʏᴏᴜʀ ʟɪɴᴋ:\n\n🔗 ᴏʀɪɢɪɴᴀʟ ʟɪɴᴋ :- {share_link}</b>")
         
 
-@Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed))
+@Client.on_message(filters.command(['link', 'plink']) & filters.create(allowed) & filters.user(ADMINS))
 async def gen_link_s(bot, message):
     username = (await bot.get_me()).username
     replied = message.reply_to_message
@@ -90,7 +90,7 @@ async def gen_link_s(bot, message):
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-@Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed))
+@Client.on_message(filters.command(['batch', 'pbatch']) & filters.create(allowed) & filters.user(ADMINS))
 async def gen_link_batch(bot, message):
     username = (await bot.get_me()).username
     if " " not in message.text:

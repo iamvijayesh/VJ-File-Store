@@ -19,6 +19,7 @@ from config import *
 import re
 import json
 import base64
+from config import ADMINS
 from urllib.parse import quote_plus
 from TechVJ.utils.file_properties import get_name, get_hash, get_media_file_size
 logger = logging.getLogger(__name__)
@@ -335,7 +336,7 @@ async def start(client, message):
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-@Client.on_message(filters.command('api') & filters.private)
+@Client.on_message(filters.command('api') & filters.private & filters.user(ADMINS))
 async def shortener_api_handler(client, m: Message):
     user_id = m.from_user.id
     user = await get_user(user_id)
@@ -354,7 +355,7 @@ async def shortener_api_handler(client, m: Message):
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01
 
-@Client.on_message(filters.command("base_site") & filters.private)
+@Client.on_message(filters.command("base_site") & filters.private & filters.user(ADMINS))
 async def base_site_handler(client, m: Message):
     user_id = m.from_user.id
     user = await get_user(user_id)

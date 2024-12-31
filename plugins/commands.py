@@ -28,22 +28,6 @@ logger = logging.getLogger(__name__)
 BATCH_FILES = {}
 
 
-async def is_subscribed(bot, query, channel):
-    buttons = []
-    for id in channel:
-        chat = await bot.get_chat(int(id))
-        try:
-            await bot.get_chat_member(id, query.from_user.id)
-        except UserNotParticipant:
-            buttons.append([InlineKeyboardButton(f'Join {chat.title}', url=chat.invite_link)])
-        except Exception as e:
-            pass
-    return buttons
-# Don't Remove Credit Tg - @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
-# Ask Doubt on telegram @KingVJ01
-
-
 def get_size(size):
     """Get size in readable format"""
 
@@ -59,35 +43,42 @@ def get_size(size):
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ0
 
-
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
-    if AUTH_CHANNEL:
-        try:
-            buttons = await is_subscribed(client, message, AUTH_CHANNEL)
-            if buttons:
-                username = (await client.get_me()).username
-                if message.command[1]:
-                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start={message.command[1]}")])
-                else:
-                    buttons.append([InlineKeyboardButton("♻️ Try Again ♻️", url=f"https://t.me/{username}?start=true")])
-                await message.reply_text(text=f"<b>👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on try again button. 😇</b>", reply_markup=InlineKeyboardMarkup(buttons))
-                return
-        except Exception as e:
-            print(e)
-    username = (await client.get_me()).username
+    # Get the username of the user who clicked the /start command
+    username = message.from_user.username if message.from_user.username else message.from_user.first_name
+    user_id = message.from_user.id
+
+    # Check if the user is a member of the required channel
+    try:
+        user_status = await client.get_chat_member("heretohelpcat", user_id)
+        print(f"User Status: {user_status.status}")  # Debug: print the user status
+        if user_status.status not in ["member", "administrator", "creator"]:
+            raise ValueError("User is not a member")
+    except Exception as e:
+        print(f"Error: {e}")  # Debug: print the error message
+        buttons = [[
+            InlineKeyboardButton('SUBSCRIBE', url='https://t.me/heretohelpcat')
+        ], [
+            InlineKeyboardButton('TRY AGAIN', callback_data='try_again')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await message.reply(
+            f"Hello {message.from_user.mention},\n\nTo use me, please subscribe to my channel.",
+            reply_markup=reply_markup
+        )
+        return
+
+    # Existing logic if the user is a member
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
+
+    # Check if the command has exactly two parameters
     if len(message.command) != 2:
         buttons = [[
-           
-            ],[
-            InlineKeyboardButton('💁‍♀️ ʜᴇʟᴘ', callback_data='help'),
-            InlineKeyboardButton('😊 ᴀʙᴏᴜᴛ', callback_data='about')
+            InlineKeyboardButton('SUBSCRIBE TO MY BACKUP', url='https://t.me/backcatmaterial')
         ]]
-        if CLONE_MODE == True:
-            buttons.append([InlineKeyboardButton('🤖 ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ ʙᴏᴛ', callback_data='clone')])
         reply_markup = InlineKeyboardMarkup(buttons)
         me2 = (await client.get_me()).mention
         await message.reply_photo(
@@ -96,6 +87,65 @@ async def start(client, message):
             reply_markup=reply_markup
         )
         return
+
+    # Create the "Verify" button with username or first name fallback
+    verify_url = await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start=")
+    buttons = [[
+        InlineKeyboardButton("Verify", url=verify_url)
+    ]]
+    reply_markup = InlineKeyboardMarkup(buttons)
+
+    # Reply with the message and include the "Verify" button
+    await message.reply(
+        f"Hello {message.from_user.mention}, please verify yourself by clicking the button below.",
+        reply_markup=reply_markup
+    )
+
+
+@Client.on_callback_query(filters.regex("try_again"))
+async def try_again_callback(client, callback_query):
+    # Get the user who clicked the "Try Again" button
+    message = callback_query.message
+    user_id = message.from_user.id
+    username = message.from_user.username if message.from_user.username else message.from_user.first_name
+
+    # Recheck if the user is a member of the required channel
+    try:
+        user_status = await client.get_chat_member("heretohelpcat", user_id)
+        print(f"User Status on Try Again: {user_status.status}")  # Debug: print the user status
+        if user_status.status not in ["member", "administrator", "creator"]:
+            raise ValueError("User is not a member")
+    except Exception as e:
+        print(f"Error on Try Again: {e}")  # Debug: print the error message
+        buttons = [[
+            InlineKeyboardButton('SUBSCRIBE', url='https://t.me/heretohelpcat')
+        ], [
+            InlineKeyboardButton('TRY AGAIN', callback_data='try_again')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await message.reply(
+            f"Hello {message.from_user.mention},\n\nTo use me, please subscribe to my channel.",
+            reply_markup=reply_markup
+        )
+        return
+
+    # Existing logic if the user is a member
+    if not await db.is_user_exist(message.from_user.id):
+        await db.add_user(message.from_user.id, message.from_user.first_name)
+        await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
+
+    # Create the "Verify" button with username or first name fallback
+    verify_url = await get_token(client, message.from_user.id, f"https://telegram.me/{username}?start=")
+    buttons = [[
+        InlineKeyboardButton("Verify", url=verify_url)
+    ]]
+    reply_markup = InlineKeyboardMarkup(buttons)
+
+    # Reply with the message and include the "Verify" button
+    await message.reply(
+        f"Hello {message.from_user.mention}, please verify yourself by clicking the button below.",
+        reply_markup=reply_markup
+    )
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01

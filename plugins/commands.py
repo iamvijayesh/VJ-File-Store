@@ -57,6 +57,7 @@ async def start(client, message):
             raise ValueError("User is not a member")
     except Exception as e:
         print(f"Error: {e}")  # Debug: print the error message
+        # User is not a member, prompt them to subscribe
         buttons = [[
             InlineKeyboardButton('SUBSCRIBE', url='https://t.me/heretohelpcat')
         ], [
@@ -69,7 +70,7 @@ async def start(client, message):
         )
         return
 
-    # Existing logic if the user is a member
+    # User is a member, proceed with the normal flow
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
@@ -117,6 +118,7 @@ async def try_again_callback(client, callback_query):
             raise ValueError("User is not a member")
     except Exception as e:
         print(f"Error on Try Again: {e}")  # Debug: print the error message
+        # If the user is still not a member, show the Subscribe button again
         buttons = [[
             InlineKeyboardButton('SUBSCRIBE', url='https://t.me/heretohelpcat')
         ], [
@@ -129,7 +131,7 @@ async def try_again_callback(client, callback_query):
         )
         return
 
-    # Existing logic if the user is a member
+    # User is now a member, proceed with the normal flow
     if not await db.is_user_exist(message.from_user.id):
         await db.add_user(message.from_user.id, message.from_user.first_name)
         await client.send_message(LOG_CHANNEL, script.LOG_TEXT.format(message.from_user.id, message.from_user.mention))
@@ -146,6 +148,7 @@ async def try_again_callback(client, callback_query):
         f"Hello {message.from_user.mention}, please verify yourself by clicking the button below.",
         reply_markup=reply_markup
     )
+
 # Don't Remove Credit Tg - @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot https://youtube.com/@Tech_VJ
 # Ask Doubt on telegram @KingVJ01

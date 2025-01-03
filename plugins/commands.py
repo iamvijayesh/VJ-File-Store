@@ -112,19 +112,19 @@ async def start(client, message):
         if str(message.from_user.id) != str(userid):
             return await message.reply_text(
                 text="<b>Invalid link or Expired link !</b>",
-                protect_content=False
+                protect_content=True
             )
         is_valid = await check_token(client, userid, token)
         if is_valid == True:
             await message.reply_text(
                 text=f"<b>Hey {message.from_user.mention}, You are successfully verified !\nNow you have unlimited access for all files till today midnight.</b>",
-                protect_content=False
+                protect_content=True
             )
             await verify_user(client, userid, token)
         else:
             return await message.reply_text(
                 text="<b>Invalid link or Expired link !</b>",
-                protect_content=False
+                protect_content=True
             )
     elif data.split("-", 1)[0] == "BATCH":
         try:
@@ -136,7 +136,7 @@ async def start(client, message):
                 ]]
                 await message.reply_text(
                     text="<b>You are not verified !\nKindly verify to continue !</b>",
-                    protect_content=False,
+                    protect_content=True,
                     reply_markup=InlineKeyboardMarkup(buttons)
                 )
                 return
@@ -204,7 +204,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False),
+                    protect_content=True,
                     reply_markup=reply_markup
                 )
                 filesarr.append(msg)
@@ -216,7 +216,7 @@ async def start(client, message):
                     chat_id=message.from_user.id,
                     file_id=msg.get("file_id"),
                     caption=f_caption,
-                    protect_content=msg.get('protect', False),
+                    protect_content=True,
                     reply_markup=InlineKeyboardMarkup(button)
                 )
                 filesarr.append(msg)
@@ -251,7 +251,7 @@ async def start(client, message):
             ]]
             await message.reply_text(
                 text="<b>You are not verified !\nKindly verify to continue !</b>",
-                protect_content=False,
+                protect_content=True,
                 reply_markup=InlineKeyboardMarkup(buttons)
             )
             return
@@ -259,7 +259,7 @@ async def start(client, message):
             msg = await client.send_cached_media(
                 chat_id=message.from_user.id,
                 file_id=file_id,
-                protect_content=False if pre == 'filep' else False,  
+                protect_content=True,  
             )
             filetype = msg.media
             file = getattr(msg, filetype.value)
@@ -324,7 +324,7 @@ async def start(client, message):
         ]]
         await message.reply_text(
             text="<b>You are not verified !\nKindly verify to continue !</b>",
-            protect_content=False,
+            protect_content=True,
             reply_markup=InlineKeyboardMarkup(buttons)
         )
         return
@@ -332,7 +332,7 @@ async def start(client, message):
         chat_id=message.from_user.id,
         file_id=file_id,
         caption=f_caption,
-        protect_content=Falsey if pre == 'filep' else False,
+        protect_content=True,
     )
     if STREAM_MODE == True:
         g = await x.reply_text(
